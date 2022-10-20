@@ -5,7 +5,7 @@ inputs:
     description: 'List of changed files'
     required: true
   linter-command:
-    description: 'Console command to run the linter. Changed files are automatically added as arguments - separated by space.'
+    description: 'Console command to run the linter. Changed files are automatically added as arguments as a replacement for the placeholder "{files}".'
     required: true
   parse-pattern:
     description: 'Regex expression for parsing a line of the linter output. Expected groups: level, file, line, column, message, ruleName'

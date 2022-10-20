@@ -13,7 +13,7 @@ const executeCommand = core.getInput('linter-command');
  * @return {Promise<number>}
  */
 const executeLinter = async (files) => {
-    return await exec.exec(executeCommand + ' ' + files.join(' '), undefined, options);
+    return await exec.exec(executeCommand.replace('{files}', files.join(' ')), undefined, options);
 };
 
 /**
