@@ -1,0 +1,27 @@
+name: 'Java linter'
+description: 'Linting java code'
+inputs:
+  changed-files:
+    description: 'List of changed files'
+    required: true
+  linter-command:
+    description: 'Console command to run the linter. Changed files are automatically added as arguments - separated by space.'
+    required: true
+  parse-pattern:
+    description: 'Regex expression for parsing a line of the linter output. Expected groups: level, file, line, column, message, ruleName'
+    required: true
+    default: '\[(?<level>[^\]]+)\] (?<file>[^:]+):(?<line>\d+)(?::(?<column>\d+))?: (?<message>.+) \[(?<ruleName>[^\]]+)\]'
+  relevant-file-endings:
+    description: 'List of file endings to check (JSON), empty = all'
+    required: true
+    default: '[]'
+  annotation-levels-map:
+    description: 'List of levels to annotate (JSON)'
+    required: false
+    default: '{ "err": "failure", "error": "failure", "failure": "failure", "warn": "warning", "warning": "warning", "info": "notice", "notice": "notice" }'
+outputs:
+  annotations:
+    description: 'Annotations as json which should be added to the PR'
+runs:
+  using: 'node16'
+  main: 'src/index.js'
