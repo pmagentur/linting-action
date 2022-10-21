@@ -13,7 +13,9 @@ const executeCommand = core.getInput('linter-command');
  * @return {Promise<number>}
  */
 const executeLinter = async (files) => {
-    return await exec.exec(executeCommand.replace('{files}', files.join(' ')), undefined, options);
+    const command = executeCommand.replace('{files}', files.join(' '));
+    core.info(`Executing command: ${command}`);
+    return await exec.exec(command, undefined, options);
 };
 
 /**
@@ -100,19 +102,20 @@ async function main() {
 
     try {
         await executeLinter(changedFiles);
-    } catch (error) {}
+    } catch (error) {
+        core.setFailed(`Caught error while executing linter: ${error}`);
+    }
 
     const result = linterOutput.split('\n');
     const annotations = parseAnnotations(result);
     core.setOutput('annotations', annotations);
 
-    if (linterErrors) {
-        core.setFailed(linterErrors);
-        return;
-    }
-
     if (annotations.length > 0) {
         core.setFailed(`Found ${annotations.length} problems in the code`);
+    }
+
+    if (linterErrors) {
+        core.setFailed(linterErrors);
     }
 }
 
