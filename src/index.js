@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 
+const RegexLineParser = require('./regexLineParser');
 
 const parsePattern = new RegExp(core.getInput('parse-pattern'));
 const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings')) || [];
@@ -38,43 +39,11 @@ const options = {
 };
 
 /**
- * @param {string} level
- * @return {string}
- */
-const getLevel= (level) => {
-    return annotationLevelsMapping[level] || defaultAnnotationLevel;
-};
-
-/**
- * @param {string} line A line of the linter output
- * @return {null|{endLine: string, path: string, startLine: string, annotationLevel: string, message: string}}
- */
-const parseLine = (line) => {
-    const res = parsePattern.exec(line);
-    if (!res)
-        return null;
-
-    return {
-        path: res.groups.file.replace(process.cwd() + '/', ''),
-        startLine: res.groups.line,
-        endLine: res.groups.line,
-        annotationLevel: getLevel(res.groups.level || defaultAnnotationLevel),
-        message: res.groups.message
-    };
-};
-
-/**
- * @param {string[]} linterOutput Array where each element is a line of the linter output
+ * @param {string} linterOutput Array where each element is a line of the linter output
  */
 const parseAnnotations = (linterOutput) => {
-    const annotations = [];
-    for (const line of linterOutput) {
-        const parsedLine = parseLine(line);
-        if (parsedLine)
-            annotations.push(parsedLine);
-    }
-
-    return annotations;
+    const parser = new RegexLineParser(parsePattern, annotationLevelsMapping);
+    return parser.parse(linterOutput);
 }
 
 /**
