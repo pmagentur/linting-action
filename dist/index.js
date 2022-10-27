@@ -6270,7 +6270,7 @@ const parseAnnotations = (linterOutput) => {
     let parser = null;
     switch (parserName) {
         case 'xml':
-            parser = new XmlParser(process.env.GITHUB_WORKSPACE + core.getInput('xml-annotation-parser'), annotationLevelsMapping);
+            parser = new XmlParser(process.env.GITHUB_WORKSPACE + '/' + core.getInput('xml-annotation-parser'), annotationLevelsMapping);
             break;
         case 'regex': // Fallthrough
         default:
