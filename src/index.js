@@ -2,12 +2,12 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 
 const RegexLineParser = require('./regexLineParser');
+const XmlParser = require('./xmlParser');
 
-const parsePattern = new RegExp(core.getInput('parse-pattern'));
-const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings')) || [];
-const defaultAnnotationLevel = 'failure';
-const annotationLevelsMapping = JSON.parse(core.getInput('annotation-levels-map'));
-const executeCommand = core.getInput('linter-command');
+const parserName = core.getInput('parser-name') || 'regex';
+const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings') || '[]') || [];
+const annotationLevelsMapping = JSON.parse(core.getInput('annotation-levels-map') || '{}') || {};
+const executeCommand = core.getInput('linter-command') || 'php /Users/marcel/dev/pm/php_md/phpmd.phar /Users/marcel/dev/pm/linting-php/test.php checkstyle /Users/marcel/dev/pm/php_md/pmphpmd.xml';
 
 /**
  * @param {string[]} files
@@ -42,7 +42,17 @@ const options = {
  * @param {string} linterOutput Array where each element is a line of the linter output
  */
 const parseAnnotations = (linterOutput) => {
-    const parser = new RegexLineParser(parsePattern, annotationLevelsMapping);
+    let parser = null;
+    switch (parserName) {
+        case 'xml':
+            parser = new XmlParser(process.env.GITHUB_WORKSPACE + '/' + core.getInput('xml-annotation-parser'), annotationLevelsMapping);
+            break;
+        case 'regex': // Fallthrough
+        default:
+            parser = new RegexLineParser(new RegExp(core.getInput('parse-pattern')), annotationLevelsMapping);
+            break;
+    }
+
     return parser.parse(linterOutput);
 }
 
@@ -75,8 +85,7 @@ async function main() {
         core.setFailed(`Caught error while executing linter: ${error}`);
     }
 
-    const result = linterOutput.split('\n');
-    const annotations = parseAnnotations(result);
+    const annotations = parseAnnotations(linterOutput);
     core.setOutput('annotations', annotations);
 
     if (annotations.length > 0) {

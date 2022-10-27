@@ -9,12 +9,20 @@ inputs:
     required: true
   parse-pattern:
     description: 'Regex expression for parsing a line of the linter output. Expected groups: level, file, line, column, message, ruleName'
-    required: true
+    required: false
     default: '\[(?<level>[^\]]+)\] (?<file>[^:]+):(?<line>\d+)(?::(?<column>\d+))?: (?<message>.+) \[(?<ruleName>[^\]]+)\]'
   relevant-file-endings:
     description: 'List of file endings to check (JSON), empty = all'
     required: true
     default: '[]'
+  parser-name:
+    description: 'Name of the parser to use (regex|xml)'
+    required: false
+    default: 'regex'
+  xml-annotation-parser:
+    description: 'Path to the xml annotation parser'
+    required: false
+    default: ''
   annotation-levels-map:
     description: 'List of levels to annotate (JSON)'
     required: false
@@ -24,4 +32,4 @@ outputs:
     description: 'Annotations as json which should be added to the PR'
 runs:
   using: 'node16'
-  main: 'src/index.js'
+  main: 'dist/index.js'

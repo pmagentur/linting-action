@@ -11,8 +11,9 @@ module.exports = class BaseParser {
     }
 
     constructor(annotationLevelsMapping = null) {
-        if (annotationLevelsMapping)
+        if (annotationLevelsMapping && Object.keys(annotationLevelsMapping).length > 0) {
             this.annotationLevelsMapping = annotationLevelsMapping;
+        }
     }
 
     /**
@@ -30,5 +31,9 @@ module.exports = class BaseParser {
     getLevel(level) {
         return this.annotationLevelsMapping[level] || this.defaultAnnotationLevel;
     };
+
+    getRelativePath(path) {
+        return path.replace(process.cwd() + '/', '')
+    }
 }
 

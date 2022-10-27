@@ -34,7 +34,7 @@ module.exports = class RegexLineParser extends BaseParser {
             return null;
 
         return {
-            path: res.groups.file.replace(process.cwd() + '/', ''),
+            path: this.getRelativePath(res.groups.file),
             startLine: res.groups.line,
             endLine: res.groups.line,
             annotationLevel: this.getLevel(res.groups.level || this.defaultAnnotationLevel),
