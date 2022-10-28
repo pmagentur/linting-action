@@ -6257,7 +6257,7 @@ const RegexLineParser = __nccwpck_require__(2903);
 const XmlParser = __nccwpck_require__(8837);
 const CustomParser = __nccwpck_require__(6359);
 
-const parserName = core.getInput('parser-name') || 'regex';
+const parserType = core.getInput('parser-type');
 const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings') || '[]') || [];
 const annotationLevelsMapping = JSON.parse(core.getInput('annotation-levels-map') || '{}') || {};
 const executeCommand = core.getInput('linter-command') || 'php /Users/marcel/dev/pm/php_md/phpmd.phar /Users/marcel/dev/pm/linting-php/test.php checkstyle /Users/marcel/dev/pm/php_md/pmphpmd.xml';
@@ -6297,19 +6297,19 @@ const options = {
 const parseAnnotations = (linterOutput) => {
     let parser;
     const customParser = process.env.GITHUB_WORKSPACE + '/' + core.getInput('annotation-parser');
-    switch (parserName.toLowerCase()) {
+    switch (parserType.toLowerCase()) {
         case 'xml':
-            core.info('Using XML parser with path ' + customParser);
+            core.debug('Using XML parser with path ' + customParser);
             parser = new XmlParser(customParser, annotationLevelsMapping);
             break;
         case 'custom':
-            core.info('Using custom parser with path ' + customParser);
+            core.debug('Using custom parser with path ' + customParser);
             parser = new CustomParser(customParser, annotationLevelsMapping);
             break;
         case 'regex': // Fallthrough
         default:
             const pattern = core.getInput('parse-pattern');
-            core.info('Using regex parser with pattern ' + pattern);
+            core.debug('Using regex parser with pattern ' + pattern);
             parser = new RegexLineParser(new RegExp(pattern), annotationLevelsMapping);
             break;
     }
@@ -6334,7 +6334,13 @@ const getChangedFiles = () => {
 }
 
 async function main() {
+    core.debug('Starting linter action');
+    core.debug('Relevant file endings: ' + relevantFileEndings);
+    core.debug('Annotation levels mapping: ' + annotationLevelsMapping);
+    core.debug('Parser type: ' + parserType);
+
     const changedFiles = getChangedFiles();
+    core.debug('Changed files: ' + core.getInput('changed-files'));
     if (changedFiles.length === 0) {
         core.info('No relevant files changed');
         return;
@@ -6343,14 +6349,18 @@ async function main() {
     try {
         await executeLinter(changedFiles);
     } catch (error) {
-        core.setFailed(`BLUB Caught error while executing linter: ${error}`);
+        core.setFailed(`Caught error while executing linter: ${error}`);
     }
 
+    core.debug('Linter output: \n' + linterOutput);
     const annotations = parseAnnotations(linterOutput);
+    core.debug('Annotations: ' + JSON.stringify(annotations));
     core.setOutput('annotations', annotations);
 
     if (annotations.length > 0) {
         core.setFailed(`Found ${annotations.length} problems in the code`);
+    } else {
+        core.info('No problems found in the code');
     }
 
     if (linterErrors) {
