@@ -1,10 +1,11 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 
-const RegexLineParser = require('./regexLineParser');
-const XmlParser = require('./xmlParser');
+const RegexLineParser = require('./Parser/RegexLineParser');
+const XmlParser = require('./Parser/XmlParser');
+const CustomParser = require("./Parser/CustomParser");
 
-const parserName = core.getInput('parser-name') || 'regex';
+const parserType = core.getInput('parser-type');
 const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings') || '[]') || [];
 const annotationLevelsMapping = JSON.parse(core.getInput('annotation-levels-map') || '{}') || {};
 const executeCommand = core.getInput('linter-command') || 'php /Users/marcel/dev/pm/php_md/phpmd.phar /Users/marcel/dev/pm/linting-php/test.php checkstyle /Users/marcel/dev/pm/php_md/pmphpmd.xml';
@@ -42,14 +43,22 @@ const options = {
  * @param {string} linterOutput Array where each element is a line of the linter output
  */
 const parseAnnotations = (linterOutput) => {
-    let parser = null;
-    switch (parserName) {
+    let parser;
+    const customParser = process.env.GITHUB_WORKSPACE + '/' + core.getInput('annotation-parser');
+    switch (parserName.toLowerCase()) {
         case 'xml':
-            parser = new XmlParser(process.env.GITHUB_WORKSPACE + '/' + core.getInput('xml-annotation-parser'), annotationLevelsMapping);
+            core.info('Using XML parser with path ' + customParser);
+            parser = new XmlParser(customParser, annotationLevelsMapping);
+            break;
+        case 'custom':
+            core.info('Using custom parser with path ' + customParser);
+            parser = new CustomParser(customParser, annotationLevelsMapping);
             break;
         case 'regex': // Fallthrough
         default:
-            parser = new RegexLineParser(new RegExp(core.getInput('parse-pattern')), annotationLevelsMapping);
+            const pattern = core.getInput('parse-pattern');
+            core.info('Using regex parser with pattern ' + pattern);
+            parser = new RegexLineParser(new RegExp(pattern), annotationLevelsMapping);
             break;
     }
 
@@ -82,7 +91,7 @@ async function main() {
     try {
         await executeLinter(changedFiles);
     } catch (error) {
-        core.setFailed(`Caught error while executing linter: ${error}`);
+        core.setFailed(`BLUB Caught error while executing linter: ${error}`);
     }
 
     const annotations = parseAnnotations(linterOutput);

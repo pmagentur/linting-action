@@ -15,12 +15,12 @@ inputs:
     description: 'List of file endings to check (JSON), empty = all'
     required: true
     default: '[]'
-  parser-name:
-    description: 'Name of the parser to use (regex|xml)'
+  parser-type:
+    description: 'Name of the parser to use (regex|xml|custom)'
     required: false
     default: 'regex'
-  xml-annotation-parser:
-    description: 'Path to the xml annotation parser'
+  annotation-parser:
+    description: 'Path to the xml annotation parser (type: xml|custom)'
     required: false
     default: ''
   annotation-levels-map:

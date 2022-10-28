@@ -5939,7 +5939,7 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ 7972:
+/***/ 4203:
 /***/ ((module) => {
 
 module.exports = class BaseParser {
@@ -5985,10 +5985,37 @@ module.exports = class BaseParser {
 
 /***/ }),
 
-/***/ 5658:
+/***/ 6359:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const BaseParser = __nccwpck_require__(7972);
+const BaseParser = __nccwpck_require__(4203);
+
+module.exports = class CustomParser extends BaseParser {
+    constructor(annotationParserPath, annotationLevelsMapping = null) {
+        super(annotationLevelsMapping);
+        this.annotationParserPath = annotationParserPath;
+    }
+
+    parse(linterOutput) {
+        const {getAnnotationsFromXml} = require(this.annotationParserPath);
+        const annotations = getAnnotationsFromXml(linterOutput);
+
+        for (const annotation of annotations) {
+            annotation.path = this.getRelativePath(annotation.path);
+            annotation.annotationLevel = this.getLevel(annotation.annotationLevel);
+        }
+
+        return annotations;
+    }
+}
+
+
+/***/ }),
+
+/***/ 2903:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const BaseParser = __nccwpck_require__(4203);
 
 module.exports = class RegexLineParser extends BaseParser {
     constructor(parsePattern, annotationLevelsMapping = null) {
@@ -6036,10 +6063,10 @@ module.exports = class RegexLineParser extends BaseParser {
 
 /***/ }),
 
-/***/ 8956:
+/***/ 8837:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const BaseParser = __nccwpck_require__(7972);
+const BaseParser = __nccwpck_require__(4203);
 const {XMLParser} = __nccwpck_require__(2603);
 
 module.exports = class XmlParser extends BaseParser {
@@ -6226,8 +6253,9 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
 
-const RegexLineParser = __nccwpck_require__(5658);
-const XmlParser = __nccwpck_require__(8956);
+const RegexLineParser = __nccwpck_require__(2903);
+const XmlParser = __nccwpck_require__(8837);
+const CustomParser = __nccwpck_require__(6359);
 
 const parserName = core.getInput('parser-name') || 'regex';
 const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings') || '[]') || [];
@@ -6267,14 +6295,22 @@ const options = {
  * @param {string} linterOutput Array where each element is a line of the linter output
  */
 const parseAnnotations = (linterOutput) => {
-    let parser = null;
-    switch (parserName) {
+    let parser;
+    const customParser = process.env.GITHUB_WORKSPACE + '/' + core.getInput('annotation-parser');
+    switch (parserName.toLowerCase()) {
         case 'xml':
-            parser = new XmlParser(process.env.GITHUB_WORKSPACE + '/' + core.getInput('xml-annotation-parser'), annotationLevelsMapping);
+            core.info('Using XML parser with path ' + customParser);
+            parser = new XmlParser(customParser, annotationLevelsMapping);
+            break;
+        case 'custom':
+            core.info('Using custom parser with path ' + customParser);
+            parser = new CustomParser(customParser, annotationLevelsMapping);
             break;
         case 'regex': // Fallthrough
         default:
-            parser = new RegexLineParser(new RegExp(core.getInput('parse-pattern')), annotationLevelsMapping);
+            const pattern = core.getInput('parse-pattern');
+            core.info('Using regex parser with pattern ' + pattern);
+            parser = new RegexLineParser(new RegExp(pattern), annotationLevelsMapping);
             break;
     }
 
@@ -6307,7 +6343,7 @@ async function main() {
     try {
         await executeLinter(changedFiles);
     } catch (error) {
-        core.setFailed(`Caught error while executing linter: ${error}`);
+        core.setFailed(`BLUB Caught error while executing linter: ${error}`);
     }
 
     const annotations = parseAnnotations(linterOutput);
