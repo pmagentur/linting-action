@@ -14,8 +14,8 @@ module.exports = class XmlParser extends BaseParser {
     }
 
     parse(linterOutput) {
-        const {getAnnotationsFromXml} = require(this.annotationParserPath);
-        const annotations = getAnnotationsFromXml(this.xmlParser.parse(linterOutput));
+        const {parseAnnotationsFromXml} = require(this.annotationParserPath);
+        const annotations = parseAnnotationsFromXml(this.xmlParser.parse(linterOutput));
 
         for (const annotation of annotations) {
             annotation.path = this.getRelativePath(annotation.path);

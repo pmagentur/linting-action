@@ -7,8 +7,8 @@ module.exports = class CustomParser extends BaseParser {
     }
 
     parse(linterOutput) {
-        const {getAnnotationsFromXml} = require(this.annotationParserPath);
-        const annotations = getAnnotationsFromXml(linterOutput);
+        const {parseAnnotations} = require(this.annotationParserPath);
+        const annotations = parseAnnotations(linterOutput);
 
         for (const annotation of annotations) {
             annotation.path = this.getRelativePath(annotation.path);
