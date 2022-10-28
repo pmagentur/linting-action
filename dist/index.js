@@ -6314,7 +6314,15 @@ const parseAnnotations = (linterOutput) => {
             break;
     }
 
-    return parser.parse(linterOutput);
+    const existingAnnotations = JSON.parse(core.getInput('annotations')) || [];
+    const newAnnotations = parser.parse(linterOutput);
+    if (newAnnotations.length > 0) {
+        core.setFailed(`Found ${newAnnotations.length} problems in the code`);
+    } else {
+        core.info('No problems found in the code');
+    }
+
+    return existingAnnotations.concat(newAnnotations);
 }
 
 /**
@@ -6356,12 +6364,6 @@ async function main() {
     const annotations = parseAnnotations(linterOutput);
     core.debug('Annotations: ' + JSON.stringify(annotations));
     core.setOutput('annotations', annotations);
-
-    if (annotations.length > 0) {
-        core.setFailed(`Found ${annotations.length} problems in the code`);
-    } else {
-        core.info('No problems found in the code');
-    }
 
     if (linterErrors) {
         core.setFailed(linterErrors);

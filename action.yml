@@ -27,6 +27,10 @@ inputs:
     description: 'List of levels to annotate (JSON)'
     required: false
     default: '{ "err": "failure", "error": "failure", "failure": "failure", "warn": "warning", "warning": "warning", "info": "notice", "notice": "notice" }'
+  annotations:
+    description: 'Previous annotations, new ones will be added to this list'
+    required: false
+    default: '[]'
 outputs:
   annotations:
     description: 'Annotations as json which should be added to the PR'
