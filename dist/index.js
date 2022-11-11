@@ -5973,7 +5973,7 @@ module.exports = class BaseParser {
      * @return {string}
      */
     getLevel(level) {
-        return this.annotationLevelsMapping[level] || this.defaultAnnotationLevel;
+        return this.annotationLevelsMapping[level?.toLowerCase()] || this.defaultAnnotationLevel;
     };
 
     getRelativePath(path) {
