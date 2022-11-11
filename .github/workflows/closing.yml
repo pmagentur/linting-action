@@ -1,0 +1,51 @@
+name: Pull Request checks
+
+on:
+  workflow_call:
+    inputs:
+      authors-overriding-closing:
+        description: 'Comma separated string of authors (github usernames) that can override the closing of a pull request.'
+        required: false
+        type: string
+        default: ''
+      base-authors-overriding-closing:
+        description: 'Same as authors-overriding-closing but will be added additionally. Set empty to remove our basic authors.'
+        required: false
+        type: string
+        default: 'pmSven,pmMarcel,pmAram'
+      override-comment:
+        description: 'The comment that is needed to override the closing of a pull request.'
+        required: false
+        type: string
+        default: 'LintingIsFine'
+      comment:
+        description: 'The comment that will be added to the pull request when it is closed.'
+        required: false
+        type: string
+        default: "We do not accept PRs with Linting errors. If you have any questions, please feel free to contact your project lead developer."
+    secrets:
+      github-token:
+        description: 'The github token'
+        required: true
+
+jobs:
+  close-pr:
+    name: ClosePR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find override comment
+        uses: peter-evans/find-comment@v2
+        id: findComment
+        with:
+          issue-number: ${{ github.event.number }}
+          body-includes: ${{ inputs.override-comment }}
+          direction: last
+
+      - uses: pmagentur/linting-closing-action@v1.0
+        if: ${{ steps.findComment.outputs.comment-author == 0 || !contains(format('{0},{1}', inputs.authors-overriding-closing, inputs.base-authors-overriding-closing), steps.findComment.outputs.comment-author) }}
+        with:
+          github-token: ${{ secrets.github-token }}
+          authors-overriding-closing: ${{ inputs.authors-overriding-closing }}
+          base-authors-overriding-closing: ${{ inputs.base-authors-overriding-closing }}
+          override-closing-comment: ${{ inputs.override-comment }}
+          closing-comment: ${{ inputs.comment }}
