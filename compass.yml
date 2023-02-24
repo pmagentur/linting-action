@@ -8,9 +8,6 @@ links:
   - name: PR Annotation Action
     type: REPOSITORY
     url: 'https://github.com/pmagentur/linting-annotations'
-  - name: Java Linting
-    type: REPOSITORY
-    url: 'https://github.com/pmagentur/linting-java'
   - name: PHP Linting
     type: REPOSITORY
     url: 'https://github.com/pmagentur/linting-php'
