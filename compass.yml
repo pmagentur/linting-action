@@ -1,4 +1,4 @@
-name: Github Linting
+name: Github Linting Base Action
 id: 'ari:cloud:compass:fc30d626-c7c8-44e4-9b1c-e1cc1894dd1e:component/f75966b7-3ca1-4049-bdb7-40fe65ef2a2a/718825c8-9a3b-477c-b9a4-9a12a40173ef'
 description: We created a linter base action which is used to create new linters more easily. It executes the linter, parses its outputs and converts them to the correct format for our annotations action.
 ownerId: 'ari:cloud:teams::team/f4015c13-0008-4222-b292-b0e00807b2cd'
