@@ -5,15 +5,6 @@ ownerId: 'ari:cloud:teams::team/f4015c13-0008-4222-b292-b0e00807b2cd'
 fields:
   tier: 3
 links:
-  - name: PR Annotation Action
-    type: REPOSITORY
-    url: 'https://github.com/pmagentur/linting-annotations'
-  - name: PHP Linting
-    type: REPOSITORY
-    url: 'https://github.com/pmagentur/linting-php'
-  - name: Slack
-    type: CHAT_CHANNEL
-    url: 'https://app.slack.com/client/T0G2FAWMR/C04NXD0Q1FA'
   - name: Base Linting
     type: REPOSITORY
     url: 'https://github.com/pmagentur/linting-action'
