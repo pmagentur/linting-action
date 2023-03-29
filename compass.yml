@@ -7,7 +7,10 @@ fields:
 links:
   - name: null
     type: REPOSITORY
-    url: 'https://github.com/pmagentur/linting-action'
+    url: 'https://github.com/pmagentur/linting-action'   
+  - name: Slack
+    type: CHAT_CHANNEL
+    url: 'https://app.slack.com/client/T0G2FAWMR/C04NXD0Q1FA'
   - name: Confluence
     type: DOCUMENT
     url: 'https://pmsoftware.atlassian.net/wiki/spaces/EN/pages/3643342957/WIP+Linting+Github'
