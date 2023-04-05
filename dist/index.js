@@ -6257,6 +6257,7 @@ const RegexLineParser = __nccwpck_require__(2903);
 const XmlParser = __nccwpck_require__(8837);
 const CustomParser = __nccwpck_require__(6359);
 
+const fileSeparator = core.getInput('file-separator') || ' ';
 const parserType = core.getInput('parser-type');
 const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings') || '[]') || [];
 const annotationLevelsMapping = JSON.parse(core.getInput('annotation-levels-map') || '{}') || {};
@@ -6267,7 +6268,7 @@ const executeCommand = core.getInput('linter-command') || 'php /Users/marcel/dev
  * @return {Promise<number>}
  */
 const executeLinter = async (files) => {
-    const command = executeCommand.replace('{files}', files.join(' '));
+    const command = executeCommand.replace('{files}', files.join(fileSeparator));
     core.info(`Executing command: ${command}`);
     return await exec.exec(command, undefined, options);
 };
