@@ -10,7 +10,7 @@ const parserType = core.getInput('parser-type');
 const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings') || '[]') || [];
 const excludedDirectories = JSON.parse(core.getInput('excluded-directories') || '[]') || [];
 const annotationLevelsMapping = JSON.parse(core.getInput('annotation-levels-map') || '{}') || {};
-const executeCommand = core.getInput('linter-command') || 'php /Users/marcel/dev/pm/php_md/phpmd.phar /Users/marcel/dev/pm/linting-php/test.php checkstyle /Users/marcel/dev/pm/php_md/pmphpmd.xml';
+const executeCommand = core.getInput('linter-command');
 
 /**
  * @param {string[]} files
