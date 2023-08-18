@@ -8,6 +8,7 @@ const CustomParser = require("./Parser/CustomParser");
 const fileSeparator = core.getInput('file-separator') || ' ';
 const parserType = core.getInput('parser-type');
 const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings') || '[]') || [];
+const excludedDirectories = JSON.parse(core.getInput('excluded-directories') || '[]') || [];
 const annotationLevelsMapping = JSON.parse(core.getInput('annotation-levels-map') || '{}') || {};
 const executeCommand = core.getInput('linter-command') || 'php /Users/marcel/dev/pm/php_md/phpmd.phar /Users/marcel/dev/pm/linting-php/test.php checkstyle /Users/marcel/dev/pm/php_md/pmphpmd.xml';
 
@@ -85,9 +86,28 @@ const isRelevantFile = (file) => {
     return relevantFileEndings.some(suffix => file.endsWith(suffix));
 }
 
+/**
+ * @param {string} file
+ * @return {boolean}
+ */
+const isExcludedDirectory = (file) => {
+    if (excludedDirectories.length === 0)
+        return false;
+
+    return excludedDirectories.some(directory => file.startsWith(directory));
+}
+
+/**
+ * @param {string} file
+ * @return {boolean}
+ */
+const isValidFile = (file) => {
+    return isRelevantFile(file) && !isExcludedDirectory(file);
+}
+
 const getChangedFiles = () => {
     const changedFiles = core.getInput('changed-files').split(' ');
-    return changedFiles.filter(file => isRelevantFile(file));
+    return changedFiles.filter(file => isValidFile(file));
 }
 
 async function main() {
@@ -97,7 +117,7 @@ async function main() {
     core.debug('Parser type: ' + parserType);
 
     const changedFiles = getChangedFiles();
-    core.debug('Changed files: ' + core.getInput('changed-files'));
+    core.debug('Changed files: ' + changedFiles.join(', '));
     if (changedFiles.length === 0) {
         core.info('No relevant files changed');
         return;
