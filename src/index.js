@@ -9,6 +9,10 @@ const fileSeparator = core.getInput('file-separator') || ' ';
 const parserType = core.getInput('parser-type');
 const relevantFileEndings = JSON.parse(core.getInput('relevant-file-endings') || '[]') || [];
 const annotationLevelsMapping = JSON.parse(core.getInput('annotation-levels-map') || '{}') || {};
+const annotationMaxCount = JSON.parse(core.getInput('annotation-max-count') || 800) || 800;
+const annotationTruncateThreshold = JSON.parse(core.getInput('annotation-truncate-threshold') || 500) || 500;
+const annotationTruncateFileThreshold = JSON.parse(core.getInput('annotation-truncate-file-threshold') || 50) || 50;
+const annotationTruncateFileCount = parseInt(core.getInput('annotation-truncate-file-count')|| 10) || 10 ;
 const executeCommand = core.getInput('linter-command') || 'php /Users/marcel/dev/pm/php_md/phpmd.phar /Users/marcel/dev/pm/linting-php/test.php checkstyle /Users/marcel/dev/pm/php_md/pmphpmd.xml';
 
 /**
@@ -65,13 +69,45 @@ const parseAnnotations = (linterOutput) => {
 
     const existingAnnotations = JSON.parse(core.getInput('annotations')) || [];
     const newAnnotations = parser.parse(linterOutput);
+
     if (newAnnotations.length > 0) {
         core.setFailed(`Found ${newAnnotations.length} problems in the code`);
     } else {
         core.info('No problems found in the code');
     }
 
-    return existingAnnotations.concat(newAnnotations);
+    const annotations = existingAnnotations.concat(newAnnotations);
+
+    if (annotations.length > annotationTruncateThreshold) {
+        core.debug(`Found more than ${annotationTruncateThreshold} annotations, truncating per file`);
+        const annotationsPerFile = {};
+        for (const annotation of newAnnotations) {
+            if (!annotationsPerFile[annotation.path]) {
+                annotationsPerFile[annotation.path] = [];
+            }
+            annotationsPerFile[annotation.path].push(annotation);
+        }
+
+        const truncatedAnnotations = [];
+        for (const file in annotationsPerFile) {
+            const fileAnnotations = annotationsPerFile[file];
+            if (fileAnnotations.length > annotationTruncateFileThreshold) {
+                core.debug(`Found more than ${annotationTruncateFileThreshold} annotations for file ${file}, truncating`);
+                truncatedAnnotations.push({
+                    path: file,
+                    startLine: 1,
+                    endLine: 1,
+                    annotationLevel: 'error',
+                    message: `Found ${fileAnnotations.length} problems in the code. Only the first few annotations will be shown in this file. Check the file locally to see all.`
+                })
+                truncatedAnnotations.push(fileAnnotations.slice(0, 10));
+            }
+        }
+
+        return truncatedAnnotations.slice(0, annotationMaxCount );
+    }
+
+    return annotations;
 }
 
 /**
