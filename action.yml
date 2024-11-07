@@ -19,6 +19,10 @@ inputs:
     description: 'List of file endings to check (JSON), empty = all'
     required: true
     default: '[]'
+  excluded-directories:
+    description: 'List of directories to exclude (JSON), empty = none'
+    required: false
+    default: '[]'
   parser-type:
     description: 'Name of the parser to use (regex|xml|custom)'
     required: false
