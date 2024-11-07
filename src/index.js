@@ -83,7 +83,7 @@ const isRelevantFile = (file) => {
     if (relevantFileEndings.length === 0)
         return true;
 
-    return relevantFileEndings.some(suffix => file.endsWith(suffix));
+    return relevantFileEndings.some(suffix => file.endsWith('.'+suffix));
 }
 
 /**
